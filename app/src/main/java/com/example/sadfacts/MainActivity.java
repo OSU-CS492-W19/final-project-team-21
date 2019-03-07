@@ -2,12 +2,42 @@ package com.example.sadfacts;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
+
+import pl.droidsonroids.gif.GifImageButton;
 
 public class MainActivity extends AppCompatActivity {
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        final GifImageButton gif_button = (GifImageButton)findViewById(R.id.main_gif);
+        final TextView text_bubble = findViewById(R.id.text_bubble);
+        final LinearLayout speech_bubble = findViewById(R.id.speech_bubble);
+
+
+        gif_button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                speech_bubble.setVisibility(v.VISIBLE);
+                text_bubble.setVisibility(v.VISIBLE);
+                text_bubble.setText("New text");
+                gif_button.setImageResource(R.drawable.huskie);
+
+            }
+        });
+
     }
+
+
+
 }
