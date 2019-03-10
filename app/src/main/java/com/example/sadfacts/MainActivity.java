@@ -1,5 +1,6 @@
 package com.example.sadfacts;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,13 +12,18 @@ import org.w3c.dom.Text;
 
 import pl.droidsonroids.gif.GifImageButton;
 
+import com.example.sadfacts.Utils.RedditViewmodel;
+
 public class MainActivity extends AppCompatActivity {
+    private RedditViewmodel mRedditViewmodel;
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mRedditViewmodel = ViewModelProviders.of(this).get(RedditViewmodel.class);
+        mRedditViewmodel.loadPosts();
         setContentView(R.layout.activity_main);
 
         final GifImageButton gif_button = (GifImageButton)findViewById(R.id.main_gif);
