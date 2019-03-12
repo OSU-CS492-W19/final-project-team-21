@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private ProgressBar mLoadingPB;
 
     private ArrayList<RedditAPIUtils.RedditPost> mAllPosts;
-    private int mCurrentPost;
+    private String mCurrentPost;
 
     private SharedPreferences mPreferences;
 
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         setContentView(R.layout.activity_main);
 
         mAllPosts = new ArrayList<>();
-        mCurrentPost = 0;
+        mCurrentPost = "";
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mPreferences.registerOnSharedPreferenceChangeListener(this);
@@ -69,8 +70,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     return;
 
                 synchronized (mAllPosts) {
+                    Collections.shuffle(redditPosts);
                     mAllPosts.addAll(redditPosts);
 
+                    if(!mCurrentPost.equals(mAllPosts.get(0).title)) {
+                        mCurrentPost = mAllPosts.get(0).title;
+                        mTextBubble.setText(mCurrentPost);
+                    }
                 }
             }
         });
@@ -92,14 +98,21 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             @Override
             public void onClick(View v) {
                 synchronized (mAllPosts) {
-                    if(mCurrentPost < mAllPosts.size()) {
-                        RedditAPIUtils.RedditPost post = mAllPosts.get(mCurrentPost);
-                        mCurrentPost++;
+                    if(mAllPosts.size() > 0) {
+                        mAllPosts.remove(0);
+                        RedditAPIUtils.RedditPost post = mAllPosts.get(0);
 
+
+                        mCurrentPost = post.title;
                         mTextBubble.setText(post.title);
                     } else {
-                        mCurrentPost = 0;
-                        mRedditViewModel.loadPosts(10);
+                        mCurrentPost = "";
+
+                        int sad_facts = mPreferences.getInt("sad_facts", 5);
+                        int happy_facts = mPreferences.getInt("happy_facts", 5);
+                        int cool_facts = mPreferences.getInt("cool_facts", 5);
+                        mAllPosts.clear();
+                        mRedditViewModel.loadPosts(sad_facts, happy_facts, cool_facts);
                     }
                 }
             }
@@ -107,12 +120,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         if(savedInstanceState != null && savedInstanceState.containsKey(ALL_POSTS_KEY) && savedInstanceState.containsKey(CURRENT_POST_KEY)) {
             mAllPosts = (ArrayList<RedditAPIUtils.RedditPost>)savedInstanceState.getSerializable(ALL_POSTS_KEY);
-            mCurrentPost = savedInstanceState.getInt(CURRENT_POST_KEY);
+            //mCurrentPost = savedInstanceState.getString(CURRENT_POST_KEY, "");
 
-            mTextBubble.setText(mAllPosts.get(mCurrentPost).title);
-            mCurrentPost++;
-        } else {
-            mRedditViewModel.loadPosts(10);
+            //mTextBubble.setText(mCurrentPost);
         }
     }
 
@@ -139,7 +149,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onSaveInstanceState(outState);
         if(mAllPosts != null) {
             outState.putSerializable(ALL_POSTS_KEY, mAllPosts);
-            outState.putInt(CURRENT_POST_KEY, mCurrentPost - 1);
+            mCurrentPost = mTextBubble.getText().toString();
+            outState.putString(CURRENT_POST_KEY, mCurrentPost);
         }
     }
 

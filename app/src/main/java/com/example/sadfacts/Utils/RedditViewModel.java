@@ -10,8 +10,9 @@ import android.support.annotation.Nullable;
 import java.util.List;
 
 public class RedditViewModel extends ViewModel {
-    private RedditRepository mRepositorySadjokes;
-    private RedditRepository mRepositoryCollapse;
+    private RedditRepository mRepositorySad;
+    private RedditRepository mRepositoryHappy;
+    private RedditRepository mResitoryCool;
 
 
     private MediatorLiveData<List<RedditAPIUtils.RedditPost>> mRedditPosts;
@@ -21,17 +22,24 @@ public class RedditViewModel extends ViewModel {
     Initializes viewmodel's livedata and data repository.
      */
     public RedditViewModel() {
-        mRepositorySadjokes = new RedditRepository("sadjokes");
-        mRepositoryCollapse = new RedditRepository("collapse");
+        mRepositorySad = new RedditRepository("sad");
+        mRepositoryHappy = new RedditRepository("happy");
+        mResitoryCool = new RedditRepository("cool");
 
         mRedditPosts = new MediatorLiveData<>();
-        mRedditPosts.addSource(mRepositorySadjokes.getPosts(), new Observer<List<RedditAPIUtils.RedditPost>>() {
+        mRedditPosts.addSource(mRepositorySad.getPosts(), new Observer<List<RedditAPIUtils.RedditPost>>() {
             @Override
             public void onChanged(@Nullable List<RedditAPIUtils.RedditPost> value) {
                 mRedditPosts.setValue(value);
             }
         });
-        mRedditPosts.addSource(mRepositoryCollapse.getPosts(), new Observer<List<RedditAPIUtils.RedditPost>>() {
+        mRedditPosts.addSource(mRepositoryHappy.getPosts(), new Observer<List<RedditAPIUtils.RedditPost>>() {
+            @Override
+            public void onChanged(@Nullable List<RedditAPIUtils.RedditPost> redditPosts) {
+                mRedditPosts.setValue(redditPosts);
+            }
+        });
+        mRedditPosts.addSource(mResitoryCool.getPosts(), new Observer<List<RedditAPIUtils.RedditPost>>() {
             @Override
             public void onChanged(@Nullable List<RedditAPIUtils.RedditPost> redditPosts) {
                 mRedditPosts.setValue(redditPosts);
@@ -39,13 +47,19 @@ public class RedditViewModel extends ViewModel {
         });
 
         mLoadingStatus = new MediatorLiveData<>();
-        mLoadingStatus.addSource(mRepositorySadjokes.getLoadingStatus(), new Observer<LoadingStatus>() {
+        mLoadingStatus.addSource(mRepositorySad.getLoadingStatus(), new Observer<LoadingStatus>() {
             @Override
             public void onChanged(@Nullable LoadingStatus loadingStatus) {
                 mLoadingStatus.setValue(loadingStatus);
             }
         });
-        mLoadingStatus.addSource(mRepositoryCollapse.getLoadingStatus(), new Observer<LoadingStatus>() {
+        mLoadingStatus.addSource(mRepositoryHappy.getLoadingStatus(), new Observer<LoadingStatus>() {
+            @Override
+            public void onChanged(@Nullable LoadingStatus loadingStatus) {
+                mLoadingStatus.setValue(loadingStatus);
+            }
+        });
+        mLoadingStatus.addSource(mResitoryCool.getLoadingStatus(), new Observer<LoadingStatus>() {
             @Override
             public void onChanged(@Nullable LoadingStatus loadingStatus) {
                 mLoadingStatus.setValue(loadingStatus);
@@ -56,9 +70,10 @@ public class RedditViewModel extends ViewModel {
     /*
     Calls the loadPost function from mRepository.
      */
-    public void loadPosts(int limit) {
-        mRepositorySadjokes.loadPosts(limit);
-        mRepositoryCollapse.loadPosts(limit);
+    public void loadPosts(int sad, int happy, int cool) {
+        mRepositorySad.loadPosts(sad);
+        mRepositoryHappy.loadPosts(happy);
+        mResitoryCool.loadPosts(cool);
     }
 
     /*
