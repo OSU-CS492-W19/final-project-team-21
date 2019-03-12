@@ -8,14 +8,14 @@ import android.arch.lifecycle.MutableLiveData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedditViewmodel extends ViewModel {
+public class RedditViewModel extends ViewModel {
     private RedditRepository mRepository;
     private LiveData<ArrayList<RedditAPIUtils.RedditPost>> mRedditPosts;
 
     /*
     Initializes viewmodel's livedata and data repository.
      */
-    public RedditViewmodel() {
+    public RedditViewModel() {
         mRepository = new RedditRepository();
         mRedditPosts = mRepository.getPosts();
     }

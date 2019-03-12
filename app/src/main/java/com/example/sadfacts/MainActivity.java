@@ -5,31 +5,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import pl.droidsonroids.gif.GifImageButton;
 
-import com.example.sadfacts.Utils.RedditViewmodel;
+import com.example.sadfacts.Utils.RedditViewModel;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
-    private RedditViewmodel mRedditViewmodel;
+    private RedditViewModel mRedditViewModel;
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mRedditViewmodel = ViewModelProviders.of(this).get(RedditViewmodel.class);
-        mRedditViewmodel.loadPosts();
+        mRedditViewModel = ViewModelProviders.of(this).get(RedditViewModel.class);
+        mRedditViewModel.loadPosts();
         setContentView(R.layout.activity_main);
 
         final GifImageButton gif_button = (GifImageButton)findViewById(R.id.main_gif);
