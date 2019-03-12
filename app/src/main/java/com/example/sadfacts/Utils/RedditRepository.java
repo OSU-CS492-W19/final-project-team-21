@@ -9,17 +9,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RedditRepository implements RedditAsyncTask.Callback{
-    private MutableLiveData<ArrayList<RedditAPIUtils.RedditPost>> mRedditPosts;
 
     private static final String TAG = RedditRepository.class.getSimpleName();
+
+    private static final String DEFAULT_SUBREDDIT = "sadjokes";
+
+    private MutableLiveData<ArrayList<RedditAPIUtils.RedditPost>> mRedditPosts;
+    private String mSubreddit;
+
 
     /*
     Initialize mutabledata mRedditPosts and set to null.
      */
     public RedditRepository() {
+        this(DEFAULT_SUBREDDIT);
+    }
+
+    public RedditRepository(String subreddit) {
         mRedditPosts = new MutableLiveData<>();
         mRedditPosts.setValue(null);
+        mSubreddit = subreddit;
     }
+
+
 
     /*
     Simple getter for mRedditPosts
@@ -34,8 +46,8 @@ public class RedditRepository implements RedditAsyncTask.Callback{
      */
     public void loadPosts() {
         mRedditPosts.setValue(null);
-        String redditURL = RedditAPIUtils.buildRedditURL("sadjokes");
-        Log.d(TAG, "got redit url: " + redditURL);
+        String redditURL = RedditAPIUtils.buildRedditURL(mSubreddit);
+        Log.d(TAG, "got reddit url: " + redditURL);
         new RedditAsyncTask(redditURL, this).execute();
     }
 
