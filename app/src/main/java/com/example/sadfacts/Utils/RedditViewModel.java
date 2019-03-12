@@ -10,7 +10,8 @@ import android.support.annotation.Nullable;
 import java.util.List;
 
 public class RedditViewModel extends ViewModel {
-    private RedditRepository mRepository;
+    private RedditRepository mRepositorySadjokes;
+    private RedditRepository mRepositoryCollapse;
 
 
     private MediatorLiveData<List<RedditAPIUtils.RedditPost>> mRedditPosts;
@@ -20,18 +21,31 @@ public class RedditViewModel extends ViewModel {
     Initializes viewmodel's livedata and data repository.
      */
     public RedditViewModel() {
-        mRepository = new RedditRepository();
+        mRepositorySadjokes = new RedditRepository("sadjokes");
+        mRepositoryCollapse = new RedditRepository("collapse");
 
         mRedditPosts = new MediatorLiveData<>();
-        mRedditPosts.addSource(mRepository.getPosts(), new Observer<List<RedditAPIUtils.RedditPost>>() {
+        mRedditPosts.addSource(mRepositorySadjokes.getPosts(), new Observer<List<RedditAPIUtils.RedditPost>>() {
             @Override
             public void onChanged(@Nullable List<RedditAPIUtils.RedditPost> value) {
                 mRedditPosts.setValue(value);
             }
         });
+        mRedditPosts.addSource(mRepositoryCollapse.getPosts(), new Observer<List<RedditAPIUtils.RedditPost>>() {
+            @Override
+            public void onChanged(@Nullable List<RedditAPIUtils.RedditPost> redditPosts) {
+                mRedditPosts.setValue(redditPosts);
+            }
+        });
 
         mLoadingStatus = new MediatorLiveData<>();
-        mLoadingStatus.addSource(mRepository.getLoadingStatus(), new Observer<LoadingStatus>() {
+        mLoadingStatus.addSource(mRepositorySadjokes.getLoadingStatus(), new Observer<LoadingStatus>() {
+            @Override
+            public void onChanged(@Nullable LoadingStatus loadingStatus) {
+                mLoadingStatus.setValue(loadingStatus);
+            }
+        });
+        mLoadingStatus.addSource(mRepositoryCollapse.getLoadingStatus(), new Observer<LoadingStatus>() {
             @Override
             public void onChanged(@Nullable LoadingStatus loadingStatus) {
                 mLoadingStatus.setValue(loadingStatus);
@@ -43,7 +57,8 @@ public class RedditViewModel extends ViewModel {
     Calls the loadPost function from mRepository.
      */
     public void loadPosts(int limit) {
-        mRepository.loadPosts(limit);
+        mRepositorySadjokes.loadPosts(limit);
+        mRepositoryCollapse.loadPosts(limit);
     }
 
     /*

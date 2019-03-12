@@ -2,6 +2,8 @@ package com.example.sadfacts;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,10 +26,11 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private final static String TAG = MainActivity.class.getSimpleName();
-
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String ALL_POSTS_KEY = "allpostskey";
+    private static final String CURRENT_POST_KEY = "currentpostkey";
 
     private RedditViewModel mRedditViewModel;
 
@@ -35,8 +38,10 @@ public class MainActivity extends AppCompatActivity {
     private GifImageButton mGifButton;
     private ProgressBar mLoadingPB;
 
-    private List<RedditAPIUtils.RedditPost> mAllPosts;
+    private ArrayList<RedditAPIUtils.RedditPost> mAllPosts;
+    private int mCurrentPost;
 
+    private SharedPreferences mPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,15 +49,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mAllPosts = new ArrayList<>();
+        mCurrentPost = 0;
+
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mPreferences.registerOnSharedPreferenceChangeListener(this);
 
         mGifButton = findViewById(R.id.main_gif);
-        mGifButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // PASS
-            }
-        });
-
+        mGifButton.setImageResource(PreferenceAnimals.GetDrawableIDForAnimalPreference(mPreferences.getString(getString(R.string.pref_animal), "animal_1")));
         mTextBubble = findViewById(R.id.text_bubble);
+        mTextBubble.setText("Click Me!");
+
         mLoadingPB = findViewById(R.id.pb_loading);
 
         mRedditViewModel = ViewModelProviders.of(this).get(RedditViewModel.class);
@@ -64,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
                 synchronized (mAllPosts) {
                     mAllPosts.addAll(redditPosts);
+
                 }
             }
         });
@@ -85,17 +92,28 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 synchronized (mAllPosts) {
-                    if(mAllPosts.size() > 0) {
-                        RedditAPIUtils.RedditPost post = mAllPosts.get(0);
-                        mAllPosts.remove(0);
+                    if(mCurrentPost < mAllPosts.size()) {
+                        RedditAPIUtils.RedditPost post = mAllPosts.get(mCurrentPost);
+                        mCurrentPost++;
 
-                        mTextBubble.setText(post.selftext);
+                        mTextBubble.setText(post.title);
                     } else {
+                        mCurrentPost = 0;
                         mRedditViewModel.loadPosts(10);
                     }
                 }
             }
         });
+
+        if(savedInstanceState != null && savedInstanceState.containsKey(ALL_POSTS_KEY) && savedInstanceState.containsKey(CURRENT_POST_KEY)) {
+            mAllPosts = (ArrayList<RedditAPIUtils.RedditPost>)savedInstanceState.getSerializable(ALL_POSTS_KEY);
+            mCurrentPost = savedInstanceState.getInt(CURRENT_POST_KEY);
+
+            mTextBubble.setText(mAllPosts.get(mCurrentPost).title);
+            mCurrentPost++;
+        } else {
+            mRedditViewModel.loadPosts(10);
+        }
     }
 
     @Override
@@ -116,6 +134,44 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(mAllPosts != null) {
+            outState.putSerializable(ALL_POSTS_KEY, mAllPosts);
+            outState.putInt(CURRENT_POST_KEY, mCurrentPost - 1);
+        }
+    }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("pref_animal")) {
+            String animalPref = sharedPreferences.getString(getString(R.string.pref_animal), "animal_1");
 
+            mGifButton.setImageResource(PreferenceAnimals.GetDrawableIDForAnimalPreference(animalPref));
+            Log.d(TAG, animalPref);
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

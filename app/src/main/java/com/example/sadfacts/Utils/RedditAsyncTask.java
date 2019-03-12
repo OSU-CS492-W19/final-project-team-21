@@ -39,8 +39,8 @@ public class RedditAsyncTask extends AsyncTask<Void, Void, String>{
         RedditAPIUtils.PageData pd = null;
         if (redditJSON != null) {
             pd = RedditAPIUtils.parseRedditJSON(redditJSON);
+            Log.d("Hey LISTEN", pd.posts.size() + "");
         }
-        Log.d("Hey LISTEN",pd.posts.get(0).selftext);
         mCallback.HTTPGot(pd);
     }
 

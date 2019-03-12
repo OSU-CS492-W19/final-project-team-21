@@ -7,20 +7,20 @@
         android:id="@+id/animal_1"
         android:layout_width="70dp"
         android:layout_height="match_parent"
-        android:src="@drawable/item1"/>
+        android:src="@drawable/totaro_hula"/>
     <ImageView
         android:id="@+id/animal_2"
         android:layout_width="70dp"
         android:layout_height="match_parent"
-        android:src="@drawable/item2"/>
+        android:src="@drawable/corgie"/>
     <ImageView
         android:id="@+id/animal_3"
         android:layout_width="70dp"
         android:layout_height="match_parent"
-        android:src="@drawable/item3"/>
+        android:src="@drawable/huskie"/>
     <ImageView
         android:id="@+id/animal_4"
         android:layout_width="70dp"
         android:layout_height="match_parent"
-        android:src="@drawable/item4"/>
+        android:src="@drawable/duck"/>
 </LinearLayout>

@@ -18,7 +18,7 @@ public class RedditAPIUtils {
     Base URL To Query, will be changed later.
      */
     private final static String REDDIT_BASE_URL = "https://www.reddit.com/r/";
-    private final static String DEFAULT_LISTING_TYPE = "/new";
+    private final static String DEFAULT_LISTING_TYPE = "/hot";
     private final static String RETURN_TYPE = ".json";
     private final static String LIMIT_PARAM = "limit";
     private final static int DEFAULT_LIMIT = 2;
@@ -36,7 +36,8 @@ public class RedditAPIUtils {
         public String after;
     }
 
-    public static class RedditPost {
+
+    public static class RedditPost implements Serializable {
         public String title;
         public String selftext;
     }
