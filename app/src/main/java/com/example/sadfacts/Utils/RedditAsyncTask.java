@@ -36,19 +36,19 @@ public class RedditAsyncTask extends AsyncTask<Void, Void, String>{
      */
     @Override
     protected void onPostExecute(String redditJSON) {
-        ArrayList<RedditAPIUtils.RedditPost> redditPosts = null;
+        RedditAPIUtils.PageData pd = null;
         if (redditJSON != null) {
-            redditPosts = RedditAPIUtils.parseRedditJSON(redditJSON);
+            pd = RedditAPIUtils.parseRedditJSON(redditJSON);
         }
-        Log.d("Hey LISTEN",redditPosts.get(0).selftext);
-        mCallback.HTTPGot(redditPosts);
+        Log.d("Hey LISTEN",pd.posts.get(0).selftext);
+        mCallback.HTTPGot(pd);
     }
 
     /*
     Simple callback function implemented in RedditRepository
      */
     public interface Callback {
-        void HTTPGot(ArrayList<RedditAPIUtils.RedditPost> redditPosts);
+        void HTTPGot(RedditAPIUtils.PageData pageData);
     }
 
 }
