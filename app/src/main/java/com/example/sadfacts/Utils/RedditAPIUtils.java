@@ -17,7 +17,10 @@ public class RedditAPIUtils {
      */
     private final static String REDDIT_BASE_URL = "https://www.reddit.com/r/";
     private final static String DEFAULT_LISTING_TYPE = "/hot";
-    private final static String RETURN_TYPE = ".json?limit=2";
+    private final static String RETURN_TYPE = ".json";
+    private final static String LIMIT_PARAM = "limit";
+    private final static int DEFAULT_LIMIT = 2;
+
 
     /*
     Below are a collection of classes used to parse the json returned from reddit.
@@ -44,7 +47,16 @@ public class RedditAPIUtils {
     Simple function used to create a request url based off a given subreddit.
      */
     public static String buildRedditURL(String subreddit) {
-        return REDDIT_BASE_URL + subreddit + DEFAULT_LISTING_TYPE + RETURN_TYPE;
+       return buildRedditURL(subreddit, DEFAULT_LIMIT);
+    }
+
+    public static String buildRedditURL(String subreddit, int limit) {
+        // return REDDIT_BASE_URL + subreddit + DEFAULT_LISTING_TYPE + RETURN_TYPE;
+        return Uri.parse(REDDIT_BASE_URL + subreddit + DEFAULT_LISTING_TYPE + RETURN_TYPE)
+                  .buildUpon()
+                  .appendQueryParameter(LIMIT_PARAM, limit + "")
+                  .build()
+                  .toString();
     }
 
     /*
@@ -59,8 +71,7 @@ public class RedditAPIUtils {
                 redditPosts.add(child.data);
             }
             return redditPosts;
-        }
-        else {
+        } else {
             return null;
         }
     }

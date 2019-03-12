@@ -42,7 +42,7 @@ public class RedditRepository implements RedditAsyncTask.Callback{
 
 
     /*
-    Creates and executes the REdditAsyncTask;
+    Creates and executes the RedditAsyncTask;
      */
     public void loadPosts() {
         mRedditPosts.setValue(null);
