@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <com.example.sadfacts.PreferenceAnimals
+        android:key="pref_animal"
+        android:title="Animal"
+        android:defaultValue="light" />
+
+    <SeekBarPreference
+        android:key="sad_facts"
+        android:title="Amount of Sad Facts"
+        android:summary="How often do you want to see sad facts."
+        android:max="10"
+        android:defaultValue="0" />
+
+    <SeekBarPreference
+        android:key="happy_facts"
+        android:title="Amount of Happy Facts"
+        android:summary="How often do you want to see happy facts."
+        android:max="10"
+        android:defaultValue="0" />
+
+    <SeekBarPreference
+        android:key="cool_facts"
+        android:title="Amount of Cool Facts"
+        android:summary="How often do you want to see cool facts."
+        android:max="10"
+        android:defaultValue="0" />
+
+</PreferenceScreen>
