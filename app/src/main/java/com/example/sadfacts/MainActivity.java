@@ -5,11 +5,11 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -103,11 +103,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         mAllPosts.remove(0);
                         RedditAPIUtils.RedditPost post = mAllPosts.get(0);
 
-
                         mCurrentPost = post.title;
                         mTextBubble.setText(post.title);
-
-
                     }
 
                     // if there is only one post remaining load more
@@ -126,9 +123,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         if(savedInstanceState != null && savedInstanceState.containsKey(ALL_POSTS_KEY) && savedInstanceState.containsKey(CURRENT_POST_KEY)) {
             mAllPosts = (ArrayList<RedditAPIUtils.RedditPost>)savedInstanceState.getSerializable(ALL_POSTS_KEY);
-            //mCurrentPost = savedInstanceState.getString(CURRENT_POST_KEY, "");
-
-            //mTextBubble.setText(mCurrentPost);
         }
     }
 
@@ -145,6 +139,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 return true;
+            case R.id.action_share:
+                String toShare = mTextBubble.getText().toString();
+
+                ShareCompat.IntentBuilder.from(this)
+                           .setType("text/plain")
+                           .setText(toShare)
+                           .setChooserTitle(R.string.share_chooser)
+                           .startChooser();
             default:
                 return super.onOptionsItemSelected(item);
         }
