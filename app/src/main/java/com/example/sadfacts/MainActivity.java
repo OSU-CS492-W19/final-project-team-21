@@ -98,20 +98,26 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             @Override
             public void onClick(View v) {
                 synchronized (mAllPosts) {
-                    if(mAllPosts.size() > 0) {
+                    if(mAllPosts.size() > 1) {
+
                         mAllPosts.remove(0);
                         RedditAPIUtils.RedditPost post = mAllPosts.get(0);
 
 
                         mCurrentPost = post.title;
                         mTextBubble.setText(post.title);
-                    } else {
+
+
+                    }
+
+                    // if there is only one post remaining load more
+                    if(mAllPosts.size() <= 1) {
                         mCurrentPost = "";
 
                         int sad_facts = mPreferences.getInt("sad_facts", 5);
                         int happy_facts = mPreferences.getInt("happy_facts", 5);
                         int cool_facts = mPreferences.getInt("cool_facts", 5);
-                        mAllPosts.clear();
+
                         mRedditViewModel.loadPosts(sad_facts, happy_facts, cool_facts);
                     }
                 }

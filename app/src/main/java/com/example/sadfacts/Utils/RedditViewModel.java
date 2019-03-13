@@ -12,7 +12,7 @@ import java.util.List;
 public class RedditViewModel extends ViewModel {
     private RedditRepository mRepositorySad;
     private RedditRepository mRepositoryHappy;
-    private RedditRepository mResitoryCool;
+    private RedditRepository mRepositoryCool;
 
 
     private MediatorLiveData<List<RedditAPIUtils.RedditPost>> mRedditPosts;
@@ -24,7 +24,7 @@ public class RedditViewModel extends ViewModel {
     public RedditViewModel() {
         mRepositorySad = new RedditRepository("sad");
         mRepositoryHappy = new RedditRepository("happy");
-        mResitoryCool = new RedditRepository("cool");
+        mRepositoryCool = new RedditRepository("cool");
 
         mRedditPosts = new MediatorLiveData<>();
         mRedditPosts.addSource(mRepositorySad.getPosts(), new Observer<List<RedditAPIUtils.RedditPost>>() {
@@ -39,7 +39,7 @@ public class RedditViewModel extends ViewModel {
                 mRedditPosts.setValue(redditPosts);
             }
         });
-        mRedditPosts.addSource(mResitoryCool.getPosts(), new Observer<List<RedditAPIUtils.RedditPost>>() {
+        mRedditPosts.addSource(mRepositoryCool.getPosts(), new Observer<List<RedditAPIUtils.RedditPost>>() {
             @Override
             public void onChanged(@Nullable List<RedditAPIUtils.RedditPost> redditPosts) {
                 mRedditPosts.setValue(redditPosts);
@@ -59,7 +59,7 @@ public class RedditViewModel extends ViewModel {
                 mLoadingStatus.setValue(loadingStatus);
             }
         });
-        mLoadingStatus.addSource(mResitoryCool.getLoadingStatus(), new Observer<LoadingStatus>() {
+        mLoadingStatus.addSource(mRepositoryCool.getLoadingStatus(), new Observer<LoadingStatus>() {
             @Override
             public void onChanged(@Nullable LoadingStatus loadingStatus) {
                 mLoadingStatus.setValue(loadingStatus);
@@ -73,7 +73,7 @@ public class RedditViewModel extends ViewModel {
     public void loadPosts(int sad, int happy, int cool) {
         mRepositorySad.loadPosts(sad);
         mRepositoryHappy.loadPosts(happy);
-        mResitoryCool.loadPosts(cool);
+        mRepositoryCool.loadPosts(cool);
     }
 
     /*
