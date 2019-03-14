@@ -9,41 +9,72 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RedditRepository implements RedditAsyncTask.Callback{
-    private MutableLiveData<ArrayList<RedditAPIUtils.RedditPost>> mRedditPosts;
 
     private static final String TAG = RedditRepository.class.getSimpleName();
+
+    private static final String DEFAULT_SUBREDDIT = "sadjokes";
+
+    private MutableLiveData<List<RedditAPIUtils.RedditPost>> mRedditPosts;
+    private MutableLiveData<LoadingStatus> mLoadingStatus;
+
+    private String mSubreddit;
+    private int mCount;
+    private String mAfter;
 
     /*
     Initialize mutabledata mRedditPosts and set to null.
      */
     public RedditRepository() {
+        this(DEFAULT_SUBREDDIT);
+    }
+
+    public RedditRepository(String subreddit) {
         mRedditPosts = new MutableLiveData<>();
         mRedditPosts.setValue(null);
+
+        mLoadingStatus = new MutableLiveData<>();
+        mLoadingStatus.setValue(null);
+
+        mSubreddit = subreddit;
+        mCount = 0;
+        mAfter = "";
     }
 
     /*
     Simple getter for mRedditPosts
      */
-    public LiveData<ArrayList<RedditAPIUtils.RedditPost>> getPosts() {
+    public LiveData<List<RedditAPIUtils.RedditPost>> getPosts() {
         return mRedditPosts;
     }
 
-
-    /*
-    Creates and executes the REdditAsyncTask;
-     */
-    public void loadPosts() {
-        mRedditPosts.setValue(null);
-        String redditURL = RedditAPIUtils.buildRedditURL("sadjokes");
-        Log.d(TAG, "got redit url: " + redditURL);
-        new RedditAsyncTask(redditURL, this).execute();
+    public MutableLiveData<LoadingStatus> getLoadingStatus() {
+        return mLoadingStatus;
     }
 
     /*
-    Implements HTTPGot, setting mRedditPosts the the redditPosts from the asynctask.
+    Creates and executes the RedditAsyncTask;
      */
+    public void loadPosts(int limit) {
+        mRedditPosts.setValue(null);
+        mLoadingStatus.setValue(LoadingStatus.LOADING);
+        String redditURL = RedditAPIUtils.buildRedditURL(mSubreddit, limit, mCount, mAfter);
+        mCount += limit;
+        Log.d(TAG, "got reddit url: " + redditURL);
+        new RedditAsyncTask(redditURL, this).execute();
+    }
+
     @Override
-    public void HTTPGot(ArrayList<RedditAPIUtils.RedditPost> redditPosts) {
-        mRedditPosts.setValue(redditPosts);
+    public void HTTPGot(RedditAPIUtils.PageData results) {
+        mAfter = results.after;
+        mRedditPosts.setValue(results.posts);
+
+        if(mAfter == null)
+            mCount = 0;
+
+        if(results != null) {
+            mLoadingStatus.setValue(LoadingStatus.SUCCESS);
+        } else {
+            mLoadingStatus.setValue(LoadingStatus.ERROR);
+        }
     }
 }

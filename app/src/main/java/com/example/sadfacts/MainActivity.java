@@ -1,55 +1,129 @@
 package com.example.sadfacts;
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import pl.droidsonroids.gif.GifImageButton;
 
-import com.example.sadfacts.Utils.RedditViewmodel;
+import com.example.sadfacts.Utils.LoadingStatus;
+import com.example.sadfacts.Utils.RedditAPIUtils;
+import com.example.sadfacts.Utils.RedditViewModel;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
-    private RedditViewmodel mRedditViewmodel;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String ALL_POSTS_KEY = "allpostskey";
+    private static final String CURRENT_POST_KEY = "currentpostkey";
+
+    private RedditViewModel mRedditViewModel;
+
+    private TextView mTextBubble;
+    private GifImageButton mGifButton;
+    private ProgressBar mLoadingPB;
+
+    private ArrayList<RedditAPIUtils.RedditPost> mAllPosts;
+    private String mCurrentPost;
+
+    private SharedPreferences mPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mRedditViewmodel = ViewModelProviders.of(this).get(RedditViewmodel.class);
-        mRedditViewmodel.loadPosts();
         setContentView(R.layout.activity_main);
 
-        final GifImageButton gif_button = (GifImageButton)findViewById(R.id.main_gif);
-        final TextView text_bubble = findViewById(R.id.text_bubble);
-        final LinearLayout speech_bubble = findViewById(R.id.speech_bubble);
+        mAllPosts = new ArrayList<>();
+        mCurrentPost = "";
 
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mPreferences.registerOnSharedPreferenceChangeListener(this);
 
-        gif_button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+        mGifButton = findViewById(R.id.main_gif);
+        mGifButton.setImageResource(PreferenceAnimals.GetDrawableIDForAnimalPreference(mPreferences.getString(getString(R.string.pref_animal), "animal_1")));
+        mTextBubble = findViewById(R.id.text_bubble);
+        mTextBubble.setText("Click Me!");
 
-                speech_bubble.setVisibility(v.VISIBLE);
-                text_bubble.setVisibility(v.VISIBLE);
-                text_bubble.setText("New text");
-                gif_button.setImageResource(R.drawable.huskie);
+        mLoadingPB = findViewById(R.id.pb_loading);
 
+        mRedditViewModel = ViewModelProviders.of(this).get(RedditViewModel.class);
+        mRedditViewModel.getPosts().observe(this, new Observer<List<RedditAPIUtils.RedditPost>>() {
+            @Override
+            public void onChanged(@Nullable List<RedditAPIUtils.RedditPost> redditPosts) {
+                if(redditPosts == null)
+                    return;
+
+                synchronized (mAllPosts) {
+                    Collections.shuffle(redditPosts);
+                    mAllPosts.addAll(redditPosts);
+
+                    if(!mCurrentPost.equals(mAllPosts.get(0).title)) {
+                        mCurrentPost = mAllPosts.get(0).title;
+                        mTextBubble.setText(mCurrentPost);
+                    }
+                }
             }
         });
 
-        //Intent intent = new Intent(this, SettingsActivity.class);
-        //startActivity(intent);
+        mRedditViewModel.getLoadingStatus().observe(this, new Observer<LoadingStatus>() {
+            @Override
+            public void onChanged(@Nullable LoadingStatus loadingStatus) {
+                if(loadingStatus == LoadingStatus.LOADING) {
+                    mLoadingPB.setVisibility(View.VISIBLE);
+                } else if(loadingStatus == LoadingStatus.SUCCESS) {
+                    mLoadingPB.setVisibility(View.INVISIBLE);
+                } else {
+                    // TODO: implement
+                }
+            }
+        });
+
+        mGifButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                synchronized (mAllPosts) {
+                    if(mAllPosts.size() > 1) {
+
+                        mAllPosts.remove(0);
+                        RedditAPIUtils.RedditPost post = mAllPosts.get(0);
+
+                        mCurrentPost = post.title;
+                        mTextBubble.setText(post.title);
+                    }
+
+                    // if there is only one post remaining load more
+                    if(mAllPosts.size() <= 1) {
+                        mCurrentPost = "";
+
+                        int sad_facts = mPreferences.getInt("sad_facts", 5);
+                        int happy_facts = mPreferences.getInt("happy_facts", 5);
+                        int cool_facts = mPreferences.getInt("cool_facts", 5);
+
+                        mRedditViewModel.loadPosts(sad_facts, happy_facts, cool_facts);
+                    }
+                }
+            }
+        });
+
+        if(savedInstanceState != null && savedInstanceState.containsKey(ALL_POSTS_KEY) && savedInstanceState.containsKey(CURRENT_POST_KEY)) {
+            mAllPosts = (ArrayList<RedditAPIUtils.RedditPost>)savedInstanceState.getSerializable(ALL_POSTS_KEY);
+        }
     }
 
     @Override
@@ -65,11 +139,58 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 return true;
+            case R.id.action_share:
+                String toShare = mTextBubble.getText().toString();
+
+                ShareCompat.IntentBuilder.from(this)
+                           .setType("text/plain")
+                           .setText(toShare)
+                           .setChooserTitle(R.string.share_chooser)
+                           .startChooser();
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(mAllPosts != null) {
+            outState.putSerializable(ALL_POSTS_KEY, mAllPosts);
+            mCurrentPost = mTextBubble.getText().toString();
+            outState.putString(CURRENT_POST_KEY, mCurrentPost);
+        }
+    }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("pref_animal")) {
+            String animalPref = sharedPreferences.getString(getString(R.string.pref_animal), "animal_1");
 
+            mGifButton.setImageResource(PreferenceAnimals.GetDrawableIDForAnimalPreference(animalPref));
+            Log.d(TAG, animalPref);
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

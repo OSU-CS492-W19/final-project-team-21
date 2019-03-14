@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">SadFacts</string>
+    <string name="pref_animal">pref_animal</string>
+
+    <string name="animal_1">totaro_hula</string>
+    <string name="animal_2">corgie</string>
+    <string name="animal_3">huskie</string>
+    <string name="animal_4">duck</string>
+
+    <string name="share_chooser">Share</string>
+
 </resources>

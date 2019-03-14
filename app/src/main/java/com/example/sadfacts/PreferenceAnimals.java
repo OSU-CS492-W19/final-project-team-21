@@ -115,10 +115,24 @@ public class PreferenceAnimals extends Preference {
     protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
         if (restorePersistedValue) {
             pAnimal = getPersistedString(DEFAULT_VALUE);
-        }
-        else {
+        } else {
             pAnimal = DEFAULT_VALUE;
             persistString(pAnimal);
         }
     }
+
+    public static int GetDrawableIDForAnimalPreference(String animal) {
+        switch (animal) {
+            case "animal_2":
+                return R.drawable.corgie;
+            case "animal_3":
+                return R.drawable.huskie;
+            case "animal_4":
+                return R.drawable.duck;
+            case "animal_1":
+            default:
+                return R.drawable.totaro_hula;
+        }
+    }
+
 }
